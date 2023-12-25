@@ -3,7 +3,7 @@
 <head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>index</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>AnimalChatbot</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
 
 
@@ -15110,13 +15110,43 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Troy-Mazerolle"><div style="text-align: center;">Troy Mazerolle</div><a class="anchor-link" href="#Troy-Mazerolle">&#182;</a></h1><div style="text-align: center;">519-722-7202</div>
-<div style="text-align: center;">tjmazerolle@outlook.com</div>
-<div style="text-align: center;">Waterloo, Ontario</div>
+<h1 id="Simple-Chatbot/Query-Search-for-Animals">Simple Chatbot/Query Search for Animals<a class="anchor-link" href="#Simple-Chatbot/Query-Search-for-Animals">&#182;</a></h1><p>The goal for this notebook is to create a simple chatbot that can potentially answer various questions about animals.  To do this, we will scrape a variety of Wikipedia articles relating to animals, seperate out each sentence in each article, match the inputted query to the sentence that most closely matches the query via the TF-IDF method, and output that sentence as the chatbot's response.</p>
 
 </div>
 </div>
 </div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Webscrapping </span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">string</span>
+
+<span class="c1"># nltk</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">from</span> <span class="nn">nltk.tokenize</span> <span class="kn">import</span> <span class="n">sent_tokenize</span><span class="p">,</span> <span class="n">word_tokenize</span>
+<span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="kn">import</span> <span class="n">stopwords</span><span class="p">,</span> <span class="n">wordnet</span>
+<span class="kn">from</span> <span class="nn">nltk.stem</span> <span class="kn">import</span> <span class="n">WordNetLemmatizer</span>
+
+<span class="c1"># Feature Extraction</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">TfidfVectorizer</span>
+
+<span class="c1"># Utility</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div>
 <div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
@@ -15124,13 +15154,37 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h2><p>My name is Troy Mazerolle, and I am a University of Waterloo graduate holding a Bachelor's Degree in Economics with a specialization in Econometrics and a minor degree in Mathematics. Currently, I am advancing my expertise by pursuing a Graduate Certificate in Applied Artificial Intelligence and Machine Learning at Conestoga College, with a planned four-month co-op term commencing in May 2024. I am actively seeking a placement for this co-op term to apply and enhance my academic foundation in a practical setting.</p>
-<p>I am a dynamic and results-driven data science enthusiast with a solid academic background in Artificial Intelligence and Econometrics, and hands-on experience in statistical analysis, machine learning, and data visualization. I am seeking a challenging role in data science or actuarial science where I can leverage my analytical skills, programming proficiency in Python and R, and passion for transforming complex data sets into actionable insights. I am eager to contribute to a dynamic team to apply cutting-edge data science techniques to problems and drive impactful solutions in a collaborative and innovative environment.</p>
-<p>Below are more details that speak to my qualifications and abilities. Under <strong>Job Information</strong> you can find my resumé and transcripts, and under <strong>Portfolio</strong> you can find some examples of projects that I have completed and which areas of expertise each project demonstrates.</p>
+<h2 id="Gathering-and-Cleaning-the-Data">Gathering and Cleaning the Data<a class="anchor-link" href="#Gathering-and-Cleaning-the-Data">&#182;</a></h2><p>First, we need a function to scrape the data from a Wikipedia link, which is written below.</p>
 
 </div>
 </div>
 </div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">scrape_wikipedia</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">wiki_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+        <span class="n">paragraphs</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;mw-content-text&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">paragraph</span> <span class="ow">in</span> <span class="n">paragraphs</span><span class="p">:</span>
+            <span class="n">wiki_text</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">paragraph</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">return</span> <span class="n">wiki_text</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div>
 <div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
@@ -15138,16 +15192,78 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Job-Information">Job Information<a class="anchor-link" href="#Job-Information">&#182;</a></h2><ul>
-<li><a href="https://www.linkedin.com/in/troy-mazerolle/">LinkedIn</a></li>
-<li><a href="https://tjmazerolle.github.io/Portfolio/resume.pdf">Resumé</a></li>
-<li><a href="https://tjmazerolle.github.io/Portfolio/TranscriptConestoga.pdf">Conestoga College Transcript</a></li>
-<li><a href="https://tjmazerolle.github.io/Portfolio/TranscriptWaterloo.pdf">University of Waterloo Transcript</a></li>
-</ul>
+<p>Now that we have our function, we can create a list of links that we want to scrape, and store the texts of all the articles for processing.  Below, you can see which Wikipedia articles we chose to scrape for this project.</p>
 
 </div>
 </div>
 </div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">list_of_wiki_pages</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;https://en.wikipedia.org/wiki/Dog&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Cat&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Horse&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Lion&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Tiger&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Cattle&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Snake&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Insect&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Bear&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Wolf&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Koala&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Vertebrate&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Dinosaur&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Red_panda&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Capybara&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Reptile&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Giraffe&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Deer&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Cheetah&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Turtle&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Axolotl&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Chordate&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Shark&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Sloth&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Frog&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Quokka&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Gorilla&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Raccoon&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Leopard&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Otter&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Hippopotamus&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Narwhal&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Meerkat&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Sheep&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Goat&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Donkey&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Ferret&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Squirrel&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Amphibian&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Hamster&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Spider&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Platypus&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Lizard&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Hedgehog&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Glaucus_atlanticus&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Hyena&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Crocodile&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;https://en.wikipedia.org/wiki/Rhinoceros&quot;</span><span class="p">]</span>
+
+<span class="n">output_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">list_of_wiki_pages</span><span class="p">:</span>
+    <span class="n">output_text</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">scrape_wikipedia</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div>
 <div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
@@ -15155,50 +15271,331 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Portfolio">Portfolio<a class="anchor-link" href="#Portfolio">&#182;</a></h2><ul>
-<li><p><a href="https://www.kaggle.com/code/troymazerolle/using-vgg16-to-classify-spectrograms/notebook">Using VGG16 to Classify Audio Genres using Spectrograms</a></p>
-<ul>
-<li>Demonstrates:<ul>
-<li>Neural Networks</li>
-<li>Image Classification</li>
-</ul>
-</li>
-<li><em>Note: The link will bring you to the Kaggle notebook for this analysis.</em><br><br></li>
-</ul>
-</li>
-<li><p><a href="https://tjmazerolle.github.io/Portfolio/WebscrappingShowcase">Webscrapping from investing.com</a></p>
-<ul>
-<li>Demonstrates:<ul>
-<li>Webscrapping with Selenium</li>
-<li>Webscrapping with BeautifulSoup</li>
-</ul>
-</li>
-<li><em>Note: While the code above works well as presented, there are still a lot of areas for improvement</em><br><br></li>
-</ul>
-</li>
-<li><p><a href="https://tjmazerolle.github.io/Portfolio/AnimalChatbot">Chatbot for Animal Information</a></p>
-<ul>
-<li>Demonstrates:<ul>
-<li>Webscrapping with BeautifulSoup</li>
-<li>Natural Language Processing<ul>
-<li>Language preprocessing</li>
-<li>TF-IDF Methods</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><em>Note: This notebook is meant more to demonstrate NLP techniques than to make a functional chatbot.  The chatbot itself is not very strong (for now).</em><br><br></li>
-</ul>
-</li>
-<li><p><a href="https://tjmazerolle.github.io/Portfolio/MahalanobisDistance">Outlier Detection using Mahalanobis Distance</a></p>
-<ul>
-<li>Demonstrates:<ul>
-<li>Outlier Detection<br><br></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<p>Note that we combined all the text from all articles into a single string.  In the next part we will break up the string into a new list where every element is a sentence from the string.</p>
+<p>Before doing that, we need to do some simple text cleaning.  Note that this is NOT the part where we do the standard NLP preprocessing steps such as removing stopwords or lemmatizing; that part will come later.  This part is meant to clean up the formatting and remove messy text that carried over from scraping the data to make the eventual output more readable.</p>
+
+</div>
+</div>
+</div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">output_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[.*?\]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">output_text</span><span class="p">)</span> <span class="c1"># remove anything in square brackets</span>
+<span class="n">output_text</span> <span class="o">=</span> <span class="n">output_text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\xa0</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>    <span class="c1"># fixing formatting for whatever \xa0 is</span>
+<span class="n">output_text</span> <span class="o">=</span> <span class="n">output_text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+<span class="n">output_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;:\u200a[0-9]+\u200a &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">output_text</span><span class="p">)</span>
+<span class="n">output_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;:\u200a[a-z]+\u200a &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">output_text</span><span class="p">)</span>
+
+<span class="n">sentences</span> <span class="o">=</span> <span class="n">sent_tokenize</span><span class="p">(</span><span class="n">output_text</span><span class="p">)</span>
+<span class="n">sentences</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[&nbsp;]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>[&#39;    The dog (Canis familiaris or Canis lupus familiaris) is a domesticated descendant of the wolf.&#39;,
+ &#34;Also called the domestic dog, it is derived from extinct Pleistocene wolves, and the modern wolf is the dog&#39;s nearest living relative.&#34;,
+ &#39;The dog was the first species to be domesticated by humans.&#39;,
+ &#39;Hunter-gatherers did this, over 15,000 years ago in Germany, which was before the development of agriculture.&#39;,
+ &#39;Due to their long association with humans, dogs have expanded to a large number of domestic individuals and gained the ability to thrive on a starch-rich diet that would be inadequate for other canids.&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Since the first article was about dogs, the first five sentences in the example output above have to do with dogs.  You can verify that the sentences above are the first five sentences in the article about dogs at <a href="https://en.wikipedia.org/wiki/Dog">https://en.wikipedia.org/wiki/Dog</a>.</p>
+<p>The sentences in <code>sentences</code> are going to be the outputs of our chatbot.  However, in order for the program to better understand which sentences match best with each query, the sentences need to be further preprocessed.  We do NOT want these preprocessed sentences as the output of the chatbot since preprocessing will include stripping away punctuation and stopwords, making the sentences difficult to understand and our chatbot will not produce realistic outputs.</p>
+<h2 id="Preprocessing">Preprocessing<a class="anchor-link" href="#Preprocessing">&#182;</a></h2><p>We will write a function to do the preprocessing of each sentence.</p>
+
+</div>
+</div>
+</div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">string_formatter</span><span class="p">(</span><span class="n">input_string</span><span class="p">):</span>
+    
+    <span class="c1"># Tokenize</span>
+    <span class="n">token_list</span> <span class="o">=</span> <span class="n">word_tokenize</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span> 
+    <span class="c1"># Put to Lower Case</span>
+    <span class="n">case_folded</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">token_list</span><span class="p">]</span> 
+    <span class="c1"># Remove Stop Words</span>
+    <span class="n">stop_words_removed_case_folded</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">case_folded</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stopwords</span><span class="o">.</span><span class="n">words</span><span class="p">(</span><span class="s1">&#39;english&#39;</span><span class="p">)]</span> 
+    <span class="c1"># Remove Punctuation</span>
+    <span class="n">stop_words_punctuation_removed_case_folded</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">stop_words_removed_case_folded</span><span class="p">]</span> <span class="c1"># special case for hyphens</span>
+    <span class="n">stop_words_punctuation_removed_case_folded</span> <span class="o">=</span> <span class="p">[</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^\w\s]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">stop_words_punctuation_removed_case_folded</span><span class="p">]</span> 
+    <span class="c1"># POS Tagged</span>
+    <span class="n">pos_tagged_words</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">pos_tag</span><span class="p">(</span><span class="n">stop_words_punctuation_removed_case_folded</span><span class="p">)</span>
+
+    <span class="c1"># POS tags for wnl.lematize</span>
+    <span class="n">new_tags</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;VB&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;VBG&quot;</span><span class="p">)</span> <span class="o">|</span>
+            <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;VBD&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;VBN&quot;</span><span class="p">)</span> <span class="o">|</span>
+            <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;VBP&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;VBZ&quot;</span><span class="p">)):</span>
+            <span class="n">new_tags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wordnet</span><span class="o">.</span><span class="n">VERB</span>
+        <span class="k">elif</span> <span class="p">((</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;JJ&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;JJR&quot;</span><span class="p">)</span> <span class="o">|</span>
+              <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;JJS&quot;</span><span class="p">)):</span>
+            <span class="n">new_tags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wordnet</span><span class="o">.</span><span class="n">ADJ</span>
+        <span class="k">elif</span> <span class="p">((</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;RB&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;RBR&quot;</span><span class="p">)</span> <span class="o">|</span>
+              <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;RBS&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pos_tagged_words</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;WRB&quot;</span><span class="p">)):</span>
+            <span class="n">new_tags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wordnet</span><span class="o">.</span><span class="n">ADV</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_tags</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wordnet</span><span class="o">.</span><span class="n">NOUN</span>
+
+    <span class="c1"># Lemmatization</span>
+    <span class="n">wnl</span> <span class="o">=</span> <span class="n">WordNetLemmatizer</span><span class="p">()</span>
+    <span class="n">lemma_words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">stop_words_punctuation_removed_case_folded</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stop_words_punctuation_removed_case_folded</span><span class="p">)):</span>
+        <span class="n">lemma_words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">wnl</span><span class="o">.</span><span class="n">lemmatize</span><span class="p">(</span><span class="n">stop_words_punctuation_removed_case_folded</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">new_tags</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="n">sentence</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lemma_words</span><span class="p">)</span> 
+    <span class="n">sentence</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">sentence</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="c1"># remove extra spaces between words</span>
+    <span class="k">return</span> <span class="n">sentence</span>
+
+<span class="n">training_text</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">)</span> <span class="c1"># pre-allocate memory</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">training_text</span><span class="p">)):</span>
+    <span class="n">training_text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">string_formatter</span><span class="p">(</span><span class="n">sentences</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">training_text</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[&nbsp;]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>[&#39;dog canis familiaris canis lupus familiaris domesticate descendant wolf&#39;,
+ &#39;also call domestic dog derive extinct pleistocene wolf modern wolf dog s near living relative&#39;,
+ &#39;dog first specie domesticate human&#39;,
+ &#39;hunter gatherers 15000 year ago germany development agriculture&#39;,
+ &#39;due long association human dog expand large number domestic individual gain ability thrive starch rich diet would inadequate canid&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Comparing to the outputs of the original first five sentences, we can see that the above text is a lot more bare-bones.  This is because all the punctuation has been removed, stopwords have been removed, and each word has been lemmatized.</p>
+<h2 id="Creating-the-TF-IDF-Matrix">Creating the TF-IDF Matrix<a class="anchor-link" href="#Creating-the-TF-IDF-Matrix">&#182;</a></h2><p>Now that we have our list of cleaned sentences, we can create our TF-IDF matrix.  A TF-IDF matrix is a matrix where each row corresponds to a sentence and each column corresponds to a word in the entire corpus.  Each element of the matrix has a measure that considers how often the word appears in the sentence and how many sentences the word appears in.  The formula to calculate the TF-IDF element value is $[1 + log_{10}(tf)]\ *\ log_{10}(\frac{N}{df})$, there tf (term frequency) is how often the word appears in the sentence, df (document frequency) is the number of sentences the term appears in, and N is the total number of documents.</p>
+
+</div>
+</div>
+</div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tfidf_vectorizer</span> <span class="o">=</span> <span class="n">TfidfVectorizer</span><span class="p">()</span>
+<span class="n">tfidf_matrix</span> <span class="o">=</span> <span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">training_text</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+<span class="n">feature_names</span> <span class="o">=</span> <span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Since the elements of the TF-IDF matrix are mostly 0 (most sentences only contain a fraction of the words in the corpus), I will not output a part of the matrix as an example.</p>
+<h2 id="Outputting-Results">Outputting Results<a class="anchor-link" href="#Outputting-Results">&#182;</a></h2><p>Now that we have our TF-IDF matrix, we can move onto the last part of matching a query to a sentence.  The way that this is done is by selecting the columns of the TF-IDF that contain the relevant words in the query and taking the rowsum of the remaining TF_IDF elements.  The element with the largest rowsum indicates the sentence with the highest relevance to the query.</p>
+<p>We will write a function to take in a query and output the most relevant sentence.  Note that this function will be calling on global variables defined throughout this notebook.</p>
+
+</div>
+</div>
+</div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">animal_query_response</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+    <span class="n">tokenized_query</span> <span class="o">=</span> <span class="n">word_tokenize</span><span class="p">(</span><span class="n">string_formatter</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
+
+    <span class="c1"># Create a filter for the tfidf matrix that will filter out every row that does not correspond to a tokenized word from search_query</span>
+    <span class="n">word_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_names</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">tokenized_query</span><span class="p">:</span>
+            <span class="n">word_filter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">word_filter</span> <span class="o">=</span> <span class="n">word_filter</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="n">closest_sentence_index</span> <span class="o">=</span> <span class="n">tfidf_matrix</span><span class="p">[:,</span> <span class="n">word_filter</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">sentences</span><span class="p">[</span><span class="n">closest_sentence_index</span><span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Let us see what query results we get.  Note that we already know ahead of time that a lot of the query tests will likely not produce results that make sense.  We will discuss this in the &quot;Conclusion and Next Steps&quot; section.</p>
+
+</div>
+</div>
+</div>
+</div><div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">query_input_output</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input:&quot;</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output:&quot;</span><span class="p">,</span> <span class="n">animal_query_response</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+<span class="n">queries</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dog breeds&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;aniMals thAT ARE excellEnt Climbers&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;What is the lifespan of an average house cat?&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;Which animal is the fastest land mammal?&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;What is the purpose of a chameleon&#39;s ability to change color?&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;How many hearts does an octopus have?&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;Which big cat is known for its distinctive black mane?&quot;</span><span class="p">,</span>
+           <span class="s2">&quot;Which snake is the longest in the world?&quot;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>
+    <span class="n">query_input_output</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Input: dog breeds
+Output: In conformation shows, also referred to as breed shows, a judge familiar with the specific dog breed evaluates individual purebred dogs for conformity with their established breed type as described in the breed standard.
+
+Input: aniMals thAT ARE excellEnt Climbers
+Output: Deer are also excellent jumpers and swimmers.
+
+Input: What is the lifespan of an average house cat?
+Output: House cats often mate with feral cats.
+
+Input: Which animal is the fastest land mammal?
+Output: The cheetah is the world&#39;s fastest land animal.
+
+Input: What is the purpose of a chameleon&#39;s ability to change color?
+Output: The chameleons in general use their ability to change their coloration for signalling rather than camouflage, but some species such as Smith&#39;s dwarf chameleon do use active colour change for camouflage purposes.
+
+Input: How many hearts does an octopus have?
+Output: Bears do not have many predators.
+
+Input: Which big cat is known for its distinctive black mane?
+Output: Coyotes and big cats have also been known to attack dogs.
+
+Input: Which snake is the longest in the world?
+Output: In the Western world, some snakes are kept as pets, especially docile species such as the ball python and corn snake.
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>A lot of our results do not match up very well (which we will talk about), but other queries such as &quot;Which animal is the fastest land mammal?&quot; have a perfect response in &quot;The cheetah is the world's fastest land animal&quot;.  For the notebook I only outputted a select few examples, but it is not much more work to make this into a chatbot by putting the function through a continuous loop that consistently asks for an input and returns an output.</p>
+<h2 id="Conclusion-and-Next-Steps">Conclusion and Next Steps<a class="anchor-link" href="#Conclusion-and-Next-Steps">&#182;</a></h2><p>Given that the chatbot only considers the number of words in each sentence and gives zero weight to the context of a query, it makes sense that a lot of the prompts did not produce a strong result.  For example, the question &quot;What is the lifespan of an average house cat?&quot; produced the answer &quot;House cats often mate with feral cats&quot;.  This is because the words in the query matched best with the words in the sentence.  When we look through the article on cats, it does have the sentence &quot;The average lifespan of pet cats has risen in recent decades&quot;.  However, the sentence &quot;House cats often mate with feral cats&quot; contains the word &quot;house&quot;, which also appeared in the query.  It is therefore likely that the TF-IDF matrix gave more weight to &quot;house&quot; than it did &quot;lifespan&quot;, likely because of how often each word occurs in other documents (recall that the TF-IDF matrix considers how many documents the word appears in as well).  Furthermore, the original sentence also contains the word &quot;cat&quot; twice, whereas the other option only contains the word &quot;cat&quot; once.</p>
+<p>Clearly, context matters.  Next steps for this chatbot would likely be to move on from the TF-IDF method and implement contextual embeddings such as BERT or GPT.  At that point we could also consider using the Wikipedia articles to train our own generative answers, instead of simply outputting the most correct sentence.</p>
 
 </div>
 </div>
